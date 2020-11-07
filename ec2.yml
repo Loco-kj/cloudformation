@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description:
+  WordPress
+Parameters:
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0528a5175983e7f28
+      InstanceType: t3.small
+      BlockDeviceMappings:
+        - DeviceName: /dev/sdb
+          Ebs:
+           VolumeSize: 20
+           VolumeType: gp2
+      KeyName: !Ref KeyName
+      PrivateIpAddress: 10.0.1.4
+      SecurityGroupIds:
+        - !ImportValue EC2SecurityGroupId
+      SubnetId: !ImportValue SubnetId
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          sudo amazon-linux-extras install -y epel
+          sudo yum install -y ansible
+      Tags:
+        - Key: Name
+          Value: WordPressServer
+        - Key: env
+          Value: WordPress

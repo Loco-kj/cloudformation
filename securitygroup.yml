@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description:
+  WordPress
+Resources:
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: for WordPress Server
+      VpcId: !ImportValue VpcId
+      GroupName: WordPress-SG
+      Tags:
+        - Key: Name
+          Value: WordPress-SG
+  EC2SecurityGroupIngressHTTP:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: from Internet
+      FromPort: 80
+      ToPort: 80
+      GroupId: !Ref EC2SecurityGroup
+      IpProtocol: tcp
+  EC2SecurityGroupIngressSSH:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: from Internet
+      FromPort: 22
+      ToPort: 22
+      GroupId: !Ref EC2SecurityGroup
+      IpProtocol: tcp
+  EC2SecurityGroupEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: to Internet
+      FromPort: -1
+      ToPort: -1
+      GroupId: !Ref EC2SecurityGroup
+      IpProtocol: -1
+Outputs:
+  EC2SecurityGroupId:
+    Value: !Ref EC2SecurityGroup
+    Export:
+      Name: EC2SecurityGroupId

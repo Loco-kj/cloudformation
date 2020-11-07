@@ -1,0 +1,51 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  WordPress
+
+Resources:
+  IAMRoleForEC2:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: AmazonEC2RoleforSSM
+          PolicyDocument:
+            version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ssm:*"
+                  - "ssmmessages:*"
+                  - "ec2messages:*"
+                  - "cloudwatch:PutMetricData"
+                  - "ds:CreateComputer"
+                  - "ds:DescribeDirectories"
+                  - "logs:*"
+                  - "s3:*"
+                  - "ec2:DescribeInstanceStatus"
+                Resource: "*"
+      Tags:
+        - Key: env
+          Value: WordPress
+  EC2Instanceprofile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"   # optional
+      Roles:                # required, list of String
+      - !Ref IAMRoleForEC2
+Outputs:
+  EC2Instanceprofile:
+    Value: !Ref EC2Instanceprofile
+    Export:
+      Name: EC2Instanceprofile

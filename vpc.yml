@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description:
+  WordPress
+Resources:
+  WordPressVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      Tags:
+      - Key: Name
+        Value: WordPressVPC
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: WordPressVPC-IGW
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref WordPressVPC
+      InternetGatewayId: !Ref InternetGateway
+  FrontendRouteTable:
+    Type: AWS::EC2::RouteTable
+    DependsOn: AttachGateway
+    Properties:
+      VpcId: !Ref WordPressVPC
+      Tags:
+      - Key: Name
+        Value: WordPressVPC-FrontendRouteTable
+  FrontendRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref FrontendRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  FrontendSubnet:
+    Type: AWS::EC2::Subnet
+    DependsOn: AttachGateway
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: 'true'
+      VpcId: !Ref WordPressVPC
+      Tags:
+      - Key: Name
+        Value: WordPressVPC-FrontendSubnet
+  FrontendSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref FrontendSubnet
+      RouteTableId: !Ref FrontendRouteTable
+Outputs:
+  VpcId:
+    Value: !Ref WordPressVPC
+    Export:
+      Name: VpcId
+  SubnetId:
+    Value: !Ref FrontendSubnet
+    Export:
+      Name: SubnetId
